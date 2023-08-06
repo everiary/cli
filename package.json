@@ -10,6 +10,10 @@
   "bin": {
     "everiary-cli": "src/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wemsx/everiary.git"
+  },
   "type": "module",
   "author": "wemsx",
   "license": "MIT",
