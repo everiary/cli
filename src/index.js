@@ -82,49 +82,62 @@ program
 program
   .command("new")
   .description("新增everiary")
-  .action(async () => {
-    if (isFileEmpty(`${runtimePath}config.json`)) {console.log("配置文件为空");return}
-    /* 这里需要读取../config.json中的配置来获取url */
-    let CFG = JSON.parse(fs.readFileSync(`${runtimePath}config.json`).toString())
-    let url = CFG.apiurl;
-    /**
-     * 这里需要包装body对象
-     * 参考：
-     *     const { url } = await inquirer.prompt({
-      type: "input",
-      message: "请输入ws | wss 协议地址",
-      name: "url"
-  })
-     */
-    let body = {
-      title: "测试",
-      content: "使用node-fetch发出请求",
-    };
-    try{
-    const response = await fetch(url, {
-      method: "post",
-      body: JSON.stringify(body),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-    console.log(data);}
-    catch(err){
-      console.log(err)
+  .action(() => {
+    if (isFileEmpty(`${runtimePath}config.json`)) {
+      console.log("配置文件为空");
+      return;
     }
+    let CFG = JSON.parse(
+      fs.readFileSync(`${runtimePath}config.json`).toString()
+    );
+    let url = CFG.apiurl;
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "title",
+          message: "输入要发送的标题:",
+        },
+        {
+          type: "input",
+          name: "content",
+          message: "输入要发送的内容:",
+        },
+      ])
+      .then(async (result) => {
+        let sending = {};
+        sending.title = result.title;
+        sending.content = result.content;
+        try {
+          const response = await fetch(url+"/api/ever", {
+            method: "post",
+            body: JSON.stringify(sending),
+            headers: { "Content-Type": "application/json" },
+          });
+          const data = await response.json();
+          console.log(data);
+        } catch (err) {
+          console.log(err);
+        }
+      });
   });
 
 program
   .command("get")
   .description("获取所有everiary")
+  /*.option('-a, --all', '获取所有everiary')*/
   .action(async () => {
-    if (isFileEmpty(`${runtimePath}config.json`)) {console.log("配置文件为空");return}
-    /* 这里需要读取../config.json中的配置来获取url */
-    let CFG = JSON.parse(fs.readFileSync(`${runtimePath}config.json`).toString())
+    if (isFileEmpty(`${runtimePath}config.json`)) {
+      console.log("配置文件为空");
+      return;
+    }
+    let CFG = JSON.parse(
+      fs.readFileSync(`${runtimePath}config.json`).toString()
+    );
     let url = CFG.apiurl;
-    console.log(url)
 
-    const response = await fetch(url, {
-      method: "get"
+    const response = await fetch(url+"/api/ever", {
+      method: "get",
     });
 
     const data = await response.json();
