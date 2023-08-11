@@ -147,6 +147,29 @@ program
     console.log(data);
   });
 
+  program
+  .command("random")
+  .description("随机获取一条everiary")
+  .action(async () => {
+    if (isFileEmpty(`${runtimePath}config.json`)) {
+      console.log("配置文件为空");
+      return;
+    }
+    let CFG = JSON.parse(
+      fs.readFileSync(`${runtimePath}config.json`).toString()
+    );
+    let url = CFG.apiurl;
+
+    const response = await fetch(url+"/api/ever", {
+      method: "put",
+    });
+    //后端因为未知原因配置路由会出错，所以暂时使用put方法
+
+    const data = await response.json();
+    console.log(data);
+  });
+
+
 program
   .command("delete")
   .description("删除一个everiary")
