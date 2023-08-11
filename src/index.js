@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 //模块引入
-process.env.NODE_NO_WARNINGS = 1;
+//先禁用与import相关的Warning
+import { env } from 'node:process';
+env.NODE_NO_WARNINGS=1
+
 import { program } from "commander";
 import inquirer from "inquirer";
 import fs from "fs";
@@ -142,6 +145,43 @@ program
 
     const data = await response.json();
     console.log(data);
+  });
+
+program
+  .command("delete")
+  .description("删除一个everiary")
+  .action(async () => {
+    if (isFileEmpty(`${runtimePath}config.json`)) {
+      console.log("配置文件为空");
+      return;
+    }
+    let CFG = JSON.parse(
+      fs.readFileSync(`${runtimePath}config.json`).toString()
+    );
+    let url = CFG.apiurl;
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "_id",
+          message: "输入要删除的everiary的_id:",
+        },
+        {
+          type: 'confirm',
+          name: 'check',
+          message: '删除后不可恢复！确定要删除吗',
+        },
+      ]).then(async (result) => {
+        if (result.check) {
+          const response = await fetch(url+"/api/ever/"+result._id, {
+            method: "delete",
+          });
+      
+          const data = await response.json();
+          console.log(data);
+        }
+        else console.log('已取消')
+      })
   });
 
 program.parse(process.argv);
