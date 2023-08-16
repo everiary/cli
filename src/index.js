@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 //模块引入
 //先禁用与import相关的Warning
-import { env } from 'node:process';
-env.NODE_NO_WARNINGS=1
+/*import { env } from 'node:process';
+env.NODE_NO_WARNINGS=1*/
 
 import { program } from "commander";
 import inquirer from "inquirer";
@@ -16,6 +16,12 @@ const runtimePath = jsPath[0];
 const PKG = await import(`${runtimePath}package.json`, {
   assert: { type: "json" },
 });
+
+//chalk相关定义
+const messageError = chalk.bold.red;
+const messageUpdate = chalk.bold.blue;
+const messageSuccess = chalk.bold.blueBright;
+
 //一个用于检验URL的函数
 const isValidUrl = (urlString) => {
   try {
@@ -24,6 +30,7 @@ const isValidUrl = (urlString) => {
     return false;
   }
 };
+
 //一个用于检验文件是否为空的函数
 const isFileEmpty = (path) => {
   const data = fs.readFileSync(path).toString();
@@ -65,7 +72,7 @@ program
           JSON.stringify(config),
           (err) => {
             if (err) {
-              console.log("写入失败");
+              console.log(messageError("写入失败"));
               console.log(err);
             }
           }
@@ -85,7 +92,8 @@ program
 program
   .command("new")
   .description("新增everiary")
-  .action(() => {
+  .option("-d --debugger", "debugger")
+  .action((options) => {
     if (isFileEmpty(`${runtimePath}config.json`)) {
       console.log("配置文件为空");
       return;
@@ -112,7 +120,7 @@ program
         sending.title = result.title;
         sending.content = result.content;
         try {
-          const response = await fetch(url+"/api/ever", {
+          const response = await fetch(url + "/api/ever/", {
             method: "post",
             body: JSON.stringify(sending),
             headers: { "Content-Type": "application/json" },
@@ -120,7 +128,13 @@ program
           const data = await response.json();
           console.log(data);
         } catch (err) {
-          console.log(err);
+          if (!options.debugger) {
+            console.log(
+              messageError("发送失败，加入 '-d' 参数以获取更详细报错。")
+            );
+          } else {
+            console.log(err);
+          }
         }
       });
   });
@@ -128,8 +142,9 @@ program
 program
   .command("get")
   .description("获取所有everiary")
+  .option("-d --debugger", "开启调试模式")
   /*.option('-a, --all', '获取所有everiary')*/
-  .action(async () => {
+  .action(async (options) => {
     if (isFileEmpty(`${runtimePath}config.json`)) {
       console.log("配置文件为空");
       return;
@@ -139,20 +154,29 @@ program
     );
     let url = CFG.apiurl;
 
-    const response = await fetch(url+"/api/ever", {
-      method: "get",
-    });
+    try {
+      const response = await fetch(url + "/api/ever/", {
+        method: "get",
+      });
 
-    const data = await response.json();
-    console.log(data);
+      const data = await response.json();
+      console.log(data);
+    } catch (err) {
+      if (!options.debugger) {
+        console.log(messageError("获取失败，加入 '-d' 参数以获取更详细报错。"));
+      } else {
+        console.log(err);
+      }
+    }
   });
 
-  program
+program
   .command("random")
   .description("随机获取一条everiary")
-  .action(async () => {
+  .option("-d --debugger", "debugger")
+  .action(async (options) => {
     if (isFileEmpty(`${runtimePath}config.json`)) {
-      console.log("配置文件为空");
+      console.log(messageError("配置文件为空"));
       return;
     }
     let CFG = JSON.parse(
@@ -160,20 +184,27 @@ program
     );
     let url = CFG.apiurl;
 
-    const response = await fetch(url+"/api/ever", {
-      method: "put",
-    });
-    //后端因为未知原因配置路由会出错，所以暂时使用put方法
+    try {
+      const response = await fetch(url + "/api/public/random/", {
+        method: "get",
+      });
 
-    const data = await response.json();
-    console.log(data);
+      const data = await response.json();
+      console.log(data);
+    } catch (err) {
+      if (!options.debugger) {
+        console.log(messageError("获取失败，加入 '-d' 参数以获取更详细报错。"));
+      } else {
+        console.log(err);
+      }
+    }
   });
-
 
 program
   .command("delete")
   .description("删除一个everiary")
-  .action(async () => {
+  .option("-d --debugger", "debugger")
+  .action((options) => {
     if (isFileEmpty(`${runtimePath}config.json`)) {
       console.log("配置文件为空");
       return;
@@ -190,21 +221,31 @@ program
           message: "输入要删除的everiary的_id:",
         },
         {
-          type: 'confirm',
-          name: 'check',
-          message: '删除后不可恢复！确定要删除吗',
+          type: "confirm",
+          name: "check",
+          message: "删除后不可恢复！确定要删除吗",
         },
-      ]).then(async (result) => {
+      ])
+      .then(async (result) => {
         if (result.check) {
-          const response = await fetch(url+"/api/ever/"+result._id, {
-            method: "delete",
-          });
-      
-          const data = await response.json();
-          console.log(data);
-        }
-        else console.log('已取消')
-      })
+          try {
+            const response = await fetch(url + "/api/ever/" + result._id, {
+              method: "delete",
+            });
+
+            const data = await response.json();
+            console.log(data);
+          } catch (err) {
+            if (!options.debugger) {
+              console.log(
+                messageError("删除失败，加入 '-d' 参数以获取更详细报错。")
+              );
+            } else {
+              console.log(err);
+            }
+          }
+        } else console.log(messageError("已取消"));
+      });
   });
 
 program.parse(process.argv);
