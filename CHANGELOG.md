@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/everiary/cli/compare/v0.0.5...v0.0.6) (2023-08-29)
+
+
+### ✨ Features | 新功能
+
+* 新增三个chalk样式，更改了错误显示，现在不再会直接输出错误信息了。新增了debugger参数用于显示详细的报错信息。 ([f5bce1f](https://github.com/everiary/cli/commit/f5bce1f97a1df757a9a1cd0970f054532a8401f0))
+
+
+### 🐛 Bug Fixes | Bug 修复
+
+* 解决了node因为{assert:json}引发的报错，改为不显示。 ([c536381](https://github.com/everiary/cli/commit/c536381aad6247fd3bbe399457c77f176aa58588))
+
+
+### 👻 Hard to Explain | 杂项
+
+* 最后一个支持everiary v0.0.x的版本 ([44d1f9d](https://github.com/everiary/cli/commit/44d1f9d15c3cb92e4d25d666319c2ead1e5c3692))
+
 ### [0.0.5](https://github.com/everiary/cli/compare/v0.0.4...v0.0.5) (2023-08-12)
 
 
