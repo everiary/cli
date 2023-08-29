@@ -1,9 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-warnings
 //模块引入
-//先禁用与import相关的Warning
-/*import { env } from 'node:process';
-env.NODE_NO_WARNINGS=1*/
-
 import { program } from "commander";
 import inquirer from "inquirer";
 import fs from "fs";
